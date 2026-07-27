@@ -28,7 +28,7 @@ defmodule ExDateUtil.MixProject do
     [
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:rustler_precompiled, "~> 0.8.2"},
-      {:rustler, "~> 0.36.1", optional: true}
+      {:rustler, "~> 0.38.0", optional: true}
     ]
   end
 
