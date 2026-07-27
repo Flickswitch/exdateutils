@@ -1,0 +1,21 @@
+version: 2
+
+# rustler appears in both ecosystems below -- as a hex dep in mix.exs and as a
+# crate in native/exdateutil_rrule. Dependabot cannot group across ecosystems,
+# so it will raise two separate PRs. They have to land together: a crate that
+# outruns the hex package (or vice versa) breaks source builds.
+updates:
+  - package-ecosystem: mix
+    directory: /
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: cargo
+    directory: /native/exdateutil_rrule
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
