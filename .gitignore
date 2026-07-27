@@ -28,3 +28,6 @@ ExDateUtil-*.tar
 /.elixir_ls
 
 checksum-Elixir.ExDateUtil.Rrule.exs
+
+# NIF built from source via RRULE_BUILD=1
+/priv/native/
