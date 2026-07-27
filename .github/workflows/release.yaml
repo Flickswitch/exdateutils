@@ -113,7 +113,15 @@ jobs:
       - name: Build checksum file for all targets
         run: mix rustler_precompiled.download ExDateUtil.Rrule --all --print
 
-      - name: Publish to Hex
+      - name: Configure Flickswitch private hex repo
+        run: mix hex.repo list | grep -q '^flickswitch' || mix hex.repo add flickswitch https://hex.flickswitch.cloud/repos/flickswitch --api-url https://hex.flickswitch.cloud/api/repos/flickswitch --public-key flickswitch_hex_public_key.pem
+
+      - name: Publish to hex.pm
         run: mix hex.publish --yes
         env:
           HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
+
+      - name: Publish to Flickswitch private hex repo
+        run: mix hex.publish --repo flickswitch --yes
+        env:
+          HEX_API_KEY: ${{ secrets.FLICKSWITCH_HEX_API_KEY }}
