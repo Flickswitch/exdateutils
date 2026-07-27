@@ -11,6 +11,6 @@ crate-type = ["cdylib"]
 
 [dependencies]
 rustler = "0.38.0"
-rrule = "0.7.3"
+rrule = "0.14.0"
 chrono = "0.4.19"
 chrono-tz = "0.6.1"
