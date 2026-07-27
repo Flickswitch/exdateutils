@@ -71,3 +71,48 @@ jobs:
           files: |
             ${{ steps.build-crate.outputs.file-path }}
         if: startsWith(github.ref, 'refs/tags/')
+
+  publish_hex:
+    name: Publish to Hex
+    needs: build_release
+    runs-on: ubuntu-24.04
+    # Build the NIF from source: the checksum file is not in the repo, and
+    # RustlerPrecompiled refuses to compile without one, so a precompiled
+    # build cannot bootstrap itself here. This build is throwaway -- it only
+    # exists so the module loads and can be introspected for its NIF URLs.
+    #
+    # The crate still pins rustler 0.25, which only knows NIF <= 2.16, so it
+    # panics when it reads 2.18 off modern Erlang. Pinning the target ABI
+    # sidesteps that; 2.16 loads fine on newer OTP.
+    env:
+      RRULE_BUILD: "1"
+      RUSTLER_NIF_VERSION: "2.16"
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      # Keep in sync with .tool-versions
+      - name: Install Erlang and Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: "29.0.1"
+          elixir-version: "1.20.1-otp-29"
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - run: mix deps.get
+
+      - run: mix compile
+
+      # Rebuilds checksum-Elixir.ExDateUtil.Rrule.exs from every artifact
+      # build_release just attached to this release. Publishing without this
+      # ships a partial manifest and the package only installs on the one
+      # target that happens to be listed (see v1.1.0).
+      - name: Build checksum file for all targets
+        run: mix rustler_precompiled.download ExDateUtil.Rrule --all --print
+
+      - name: Publish to Hex
+        run: mix hex.publish --yes
+        env:
+          HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
