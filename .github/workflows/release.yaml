@@ -12,7 +12,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        nif: ["2.16", "2.15"]
+        # rrule.ex sets no nif_versions, so RustlerPrecompiled requests 2.15
+        # and nothing else. Artifacts built for any other ABI are never named
+        # in the checksum manifest and never downloaded. 2.15 loads on every
+        # supported OTP anyway.
+        nif: ["2.15"]
         job:
           - {
               target: aarch64-unknown-linux-gnu,
@@ -82,13 +86,8 @@ jobs:
     # RustlerPrecompiled refuses to compile without one, so a precompiled
     # build cannot bootstrap itself here. This build is throwaway -- it only
     # exists so the module loads and can be introspected for its NIF URLs.
-    #
-    # The crate still pins rustler 0.25, which only knows NIF <= 2.16, so it
-    # panics when it reads 2.18 off modern Erlang. Pinning the target ABI
-    # sidesteps that; 2.16 loads fine on newer OTP.
     env:
       RRULE_BUILD: "1"
-      RUSTLER_NIF_VERSION: "2.16"
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4

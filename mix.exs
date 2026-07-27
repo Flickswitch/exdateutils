@@ -2,7 +2,7 @@ defmodule ExDateUtil.MixProject do
   use Mix.Project
 
   @source_url "https://github.com/Flickswitch/exdateutils"
-  @version "1.1.1"
+  @version "1.1.2"
 
   def project do
     [
@@ -27,8 +27,11 @@ defmodule ExDateUtil.MixProject do
   defp deps do
     [
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
-      {:rustler_precompiled, "~> 0.8.2"},
-      {:rustler, "~> 0.36.1", optional: true}
+      # Deliberately permissive rather than pinned to 0.9: mjml 5.3.1 caps at
+      # ~> 0.8.3, so demanding 0.9 would make this package unresolvable
+      # alongside it. Consumers without that cap still get 0.9.
+      {:rustler_precompiled, "~> 0.8.2 or ~> 0.9"},
+      {:rustler, "~> 0.38.0", optional: true}
     ]
   end
 

@@ -165,7 +165,4 @@ fn just_after(rrule_string: String, after_date: String, inc: bool) -> Vec<String
     return return_vec;
 }
 
-rustler::init!(
-    "Elixir.ExDateUtil.Rrule",
-    [next, between, just_after, just_before, properties]
-);
+rustler::init!("Elixir.ExDateUtil.Rrule");
