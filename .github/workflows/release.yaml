@@ -71,9 +71,12 @@ jobs:
           name: ${{ steps.build-crate.outputs.file-name }}
           path: ${{ steps.build-crate.outputs.file-path }}
 
+      # Consumers download the NIFs from this release, so it cannot stay a
+      # draft: draft assets are not served to an anonymous mix deps.get.
       - name: Publish archives and packages
         uses: softprops/action-gh-release@v1
         with:
+          draft: false
           files: |
             ${{ steps.build-crate.outputs.file-path }}
         if: startsWith(github.ref, 'refs/tags/')
@@ -113,15 +116,15 @@ jobs:
       - name: Build checksum file for all targets
         run: mix rustler_precompiled.download ExDateUtil.Rrule --all --print
 
-      - name: Configure Flickswitch private hex repo
-        run: mix hex.repo list | grep -q '^flickswitch' || mix hex.repo add flickswitch https://hex.flickswitch.cloud/repos/flickswitch --api-url https://hex.flickswitch.cloud/api/repos/flickswitch --public-key flickswitch_hex_public_key.pem
-
       - name: Publish to hex.pm
         run: mix hex.publish --yes
         env:
           HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
 
+      # mini_repo takes a publish over its own API, so the target is HEX_API_URL,
+      # not a --repo flag. hex.repo add only configures reads and is not needed here.
       - name: Publish to Flickswitch private hex repo
-        run: mix hex.publish --repo flickswitch --yes
+        run: mix hex.publish package --yes
         env:
+          HEX_API_URL: https://hex.flickswitch.cloud/api/repos/flickswitch
           HEX_API_KEY: ${{ secrets.FLICKSWITCH_HEX_API_KEY }}
