@@ -74,7 +74,7 @@ jobs:
       # Consumers download the NIFs from this release, so it cannot stay a
       # draft: draft assets are not served to an anonymous mix deps.get.
       - name: Publish archives and packages
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v3
         with:
           draft: false
           files: |
