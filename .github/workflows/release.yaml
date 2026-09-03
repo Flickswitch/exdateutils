@@ -116,15 +116,19 @@ jobs:
       - name: Build checksum file for all targets
         run: mix rustler_precompiled.download ExDateUtil.Rrule --all --print
 
+      # Private repo goes first because a private publish can always be
+      # overwritten, so re-running this job after a later step fails is safe.
+      # hex.pm rejects a re-publish of the same version after an hour.
+      #
+      # mini_repo takes a publish over its own API, so the target is HEX_API_URL,
+      # not a --repo flag. hex.repo add only configures reads and is not needed here.
+      - name: Publish to Flickswitch private hex repo
+        run: mix hex.publish package --yes --replace
+        env:
+          HEX_API_URL: https://hex.flickswitch.cloud/api/repos/flickswitch
+          HEX_API_KEY: ${{ secrets.FLICKSWITCH_HEX_API_KEY }}
+
       - name: Publish to hex.pm
         run: mix hex.publish --yes
         env:
           HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
-
-      # mini_repo takes a publish over its own API, so the target is HEX_API_URL,
-      # not a --repo flag. hex.repo add only configures reads and is not needed here.
-      - name: Publish to Flickswitch private hex repo
-        run: mix hex.publish package --yes
-        env:
-          HEX_API_URL: https://hex.flickswitch.cloud/api/repos/flickswitch
-          HEX_API_KEY: ${{ secrets.FLICKSWITCH_HEX_API_KEY }}

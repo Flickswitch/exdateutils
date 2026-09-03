@@ -40,7 +40,9 @@ defmodule ExDateUtil.MixProject do
       description: "Rrule parser",
       maintainers: ["Flickswitch engineering"],
       licenses: ["MIT"],
-      files: ~w(lib native .formatter.exs README* LICENSE* mix.exs checksum-*.exs),
+      files: ~w(lib native/exdateutil_rrule/.cargo native/exdateutil_rrule/src
+                native/exdateutil_rrule/Cargo.toml native/exdateutil_rrule/Cargo.lock
+                .formatter.exs README* LICENSE* mix.exs checksum-*.exs),
       links: %{"GitHub" => @source_url}
     ]
   end
