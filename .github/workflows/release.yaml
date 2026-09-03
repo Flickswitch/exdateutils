@@ -40,7 +40,7 @@ jobs:
             } 
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Extract project version
         shell: bash
@@ -90,7 +90,7 @@ jobs:
       RRULE_BUILD: "1"
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # Keep in sync with .tool-versions
       - name: Install Erlang and Elixir
