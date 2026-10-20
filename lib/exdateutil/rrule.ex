@@ -5,6 +5,10 @@ defmodule ExDateUtil.Rrule do
   # Note:
   - All RRules must contain a DTSTART value, e.g. `DTSTART;TZID=Europe/London:20230326T000000Z`
   - All dates must be passed in RFC3339 format, e.g. `"2023-06-19T12:00:01+01:00"`
+
+  # Errors:
+  Every function raises `ErlangError` when it cannot parse its input or calculate the occurrences.
+  The error's `original` field holds the reason as a string.
   """
 
   mix_config = Mix.Project.config()

@@ -1,7 +1,8 @@
 use chrono::{DateTime, SecondsFormat};
 use chrono_tz::UTC;
 use rrule::{DateFilter, RRule};
-use rustler::NifStruct;
+use rustler::{Error, NifResult, NifStruct};
+use std::fmt::Display;
 
 #[derive(Debug, NifStruct)]
 #[module = "Properties"]
@@ -24,11 +25,15 @@ struct Properties {
     by_easter: String,
 }
 
+fn raise(error: impl Display) -> Error {
+    Error::RaiseTerm(Box::new(error.to_string()))
+}
+
 #[rustler::nif]
-fn properties(rrule_string: String) -> Properties {
-    let rrule: RRule = rrule_string.parse().unwrap();
+fn properties(rrule_string: String) -> NifResult<Properties> {
+    let rrule: RRule = rrule_string.parse().map_err(raise)?;
     let p = rrule.get_properties();
-    Properties {
+    Ok(Properties {
         freq: format!("{:?}", p.freq),
         interval: p.interval.clone(),
         count: format!("{:?}", p.count),
@@ -50,7 +55,7 @@ fn properties(rrule_string: String) -> Properties {
         by_minute: p.by_minute.clone(),
         by_second: p.by_second.clone(),
         by_easter: format!("{:?}", p.by_easter),
-    }
+    })
 }
 
 #[rustler::nif]
@@ -65,16 +70,16 @@ fn properties(rrule_string: String) -> Properties {
 /// Returns:
 ///
 /// A vector of strings.
-fn next(rrule_string: String, limit: u16) -> Vec<String> {
-    let rrule: RRule = rrule_string.parse().unwrap();
-    let recurrences = rrule.all(limit).unwrap();
+fn next(rrule_string: String, limit: u16) -> NifResult<Vec<String>> {
+    let rrule: RRule = rrule_string.parse().map_err(raise)?;
+    let recurrences = rrule.all(limit).map_err(raise)?;
     let iter = recurrences.iter();
     let mut return_vec: Vec<String> = Vec::new();
     for val in iter {
         return_vec.push(val.to_rfc3339_opts(SecondsFormat::Millis, true))
     }
 
-    return return_vec;
+    Ok(return_vec)
 }
 
 /// It takes a rrule string, a start date, an end date, and a boolean indicating whether to include the
@@ -92,22 +97,27 @@ fn next(rrule_string: String, limit: u16) -> Vec<String> {
 ///
 /// A vector of strings
 #[rustler::nif]
-fn between(rrule_string: String, start_date: String, end_date: String, inc: bool) -> Vec<String> {
+fn between(
+    rrule_string: String,
+    start_date: String,
+    end_date: String,
+    inc: bool,
+) -> NifResult<Vec<String>> {
     let start = DateTime::parse_from_rfc3339(&start_date)
-        .unwrap()
+        .map_err(raise)?
         .with_timezone(&UTC);
     let end = DateTime::parse_from_rfc3339(&end_date)
-        .unwrap()
+        .map_err(raise)?
         .with_timezone(&UTC);
-    let rrule: RRule = rrule_string.parse().unwrap();
-    let recurrences = rrule.all_between(start, end, inc).unwrap();
+    let rrule: RRule = rrule_string.parse().map_err(raise)?;
+    let recurrences = rrule.all_between(start, end, inc).map_err(raise)?;
     let iter = recurrences.iter();
     let mut return_vec: Vec<String> = Vec::new();
     for val in iter {
         return_vec.push(val.to_rfc3339_opts(SecondsFormat::Millis, true))
     }
 
-    return return_vec;
+    Ok(return_vec)
 }
 
 /// It takes a RRule string, a date string, and a boolean, and returns a vector of date strings
@@ -122,19 +132,19 @@ fn between(rrule_string: String, start_date: String, end_date: String, inc: bool
 ///
 /// A vector of strings.
 #[rustler::nif]
-fn just_before(rrule_string: String, before: String, inc: bool) -> Vec<String> {
+fn just_before(rrule_string: String, before: String, inc: bool) -> NifResult<Vec<String>> {
     let start = DateTime::parse_from_rfc3339(&before)
-        .unwrap()
+        .map_err(raise)?
         .with_timezone(&UTC);
-    let rrule: RRule = rrule_string.parse().unwrap();
-    let recurrences = rrule.just_before(start, inc).unwrap();
+    let rrule: RRule = rrule_string.parse().map_err(raise)?;
+    let recurrences = rrule.just_before(start, inc).map_err(raise)?;
     let iter = recurrences.iter();
     let mut return_vec: Vec<String> = Vec::new();
     for val in iter {
         return_vec.push(val.to_rfc3339_opts(SecondsFormat::Millis, true))
     }
 
-    return return_vec;
+    Ok(return_vec)
 }
 
 /// `just_after` takes a `String` containing an RRule, a `String` containing a date, and a boolean, and
@@ -150,19 +160,19 @@ fn just_before(rrule_string: String, before: String, inc: bool) -> Vec<String> {
 ///
 /// A vector of strings.
 #[rustler::nif]
-fn just_after(rrule_string: String, after_date: String, inc: bool) -> Vec<String> {
+fn just_after(rrule_string: String, after_date: String, inc: bool) -> NifResult<Vec<String>> {
     let start = DateTime::parse_from_rfc3339(&after_date)
-        .unwrap()
+        .map_err(raise)?
         .with_timezone(&UTC);
-    let rrule: RRule = rrule_string.parse().unwrap();
-    let recurrences = rrule.just_after(start, inc).unwrap();
+    let rrule: RRule = rrule_string.parse().map_err(raise)?;
+    let recurrences = rrule.just_after(start, inc).map_err(raise)?;
     let iter = recurrences.iter();
     let mut return_vec: Vec<String> = Vec::new();
     for val in iter {
         return_vec.push(val.to_rfc3339_opts(SecondsFormat::Millis, true))
     }
 
-    return return_vec;
+    Ok(return_vec)
 }
 
 rustler::init!("Elixir.ExDateUtil.Rrule");
