@@ -1,0 +1,32 @@
+name: Test
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    # Build the NIF from source: the release under test has no precompiled
+    # artifacts yet.
+    env:
+      RRULE_BUILD: "1"
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v7
+
+      # Keep in sync with .tool-versions
+      - name: Install Erlang and Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: "29.0.1"
+          elixir-version: "1.20.1-otp-29"
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - run: mix deps.get
+
+      - run: mix test
