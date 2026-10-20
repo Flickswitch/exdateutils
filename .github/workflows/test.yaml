@@ -1,0 +1,41 @@
+name: Test
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    # Build the NIF from source: the release under test has no precompiled
+    # artifacts yet.
+    env:
+      RRULE_BUILD: "1"
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v7
+
+      # Dependabot bumps the rustler crate and the rustler hex package in
+      # separate PRs. A source build needs both at the same minor version.
+      - name: Check the rustler crate and hex package match
+        run: |
+          crate=$(grep -A1 '^name = "rustler"$' native/exdateutil_rrule/Cargo.lock | sed -n 's/^version = "\(.*\)"/\1/p')
+          hex=$(sed -n 's/^  "rustler": {:hex, :rustler, "\([^"]*\)".*/\1/p' mix.lock)
+          echo "rustler crate $crate, hex package $hex"
+          [ "${crate%.*}" = "${hex%.*}" ]
+
+      # Keep in sync with .tool-versions
+      - name: Install Erlang and Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: "29.0.1"
+          elixir-version: "1.20.1-otp-29"
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - run: mix deps.get
+
+      - run: mix test
