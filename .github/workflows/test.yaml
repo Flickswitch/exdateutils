@@ -17,6 +17,15 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v7
 
+      # Dependabot bumps the rustler crate and the rustler hex package in
+      # separate PRs. A source build needs both at the same minor version.
+      - name: Check the rustler crate and hex package match
+        run: |
+          crate=$(grep -A1 '^name = "rustler"$' native/exdateutil_rrule/Cargo.lock | sed -n 's/^version = "\(.*\)"/\1/p')
+          hex=$(sed -n 's/^  "rustler": {:hex, :rustler, "\([^"]*\)".*/\1/p' mix.lock)
+          echo "rustler crate $crate, hex package $hex"
+          [ "${crate%.*}" = "${hex%.*}" ]
+
       # Keep in sync with .tool-versions
       - name: Install Erlang and Elixir
         uses: erlef/setup-beam@v1
