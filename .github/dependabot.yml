@@ -9,13 +9,53 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    groups:
+      mix-production:
+        dependency-type: production
+        update-types:
+          - "minor"
+          - "patch"
+      mix-dev-test:
+        dependency-type: development
+        update-types:
+          - "minor"
+          - "patch"
+      mix-major:
+        patterns:
+          - "*"
+        update-types:
+          - "major"
 
   - package-ecosystem: cargo
     directory: /native/exdateutil_rrule
     schedule:
       interval: weekly
+    groups:
+      cargo-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+      cargo-major:
+        patterns:
+          - "*"
+        update-types:
+          - "major"
 
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
+    groups:
+      github-actions-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+      github-actions-major:
+        patterns:
+          - "*"
+        update-types:
+          - "major"
