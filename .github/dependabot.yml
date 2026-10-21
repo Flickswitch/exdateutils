@@ -30,6 +30,12 @@ updates:
     directory: /native/exdateutil_rrule
     schedule:
       interval: weekly
+    # Stay on rrule 0.7. chrono-tz must match the version rrule 0.7 uses.
+    ignore:
+      - dependency-name: "rrule"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "chrono-tz"
+        update-types: ["version-update:semver-major"]
     groups:
       cargo-minor-patch:
         patterns:
